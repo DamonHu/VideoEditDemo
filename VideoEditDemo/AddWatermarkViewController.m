@@ -66,7 +66,16 @@
     [self AVsaveVideoPath:videoPath WithWaterImg:[UIImage imageNamed:@"avatar.png"] WithCoverImage:[UIImage imageNamed:@"demo.png"] WithQustion:@"文字水印：hudongdongBlog" WithFileName:@"waterVideo2"];
 }
 
-///使用GPUImage加载水印
+
+/**
+ 使用GPUImage加载水印
+
+ @param vedioPath 视频路径
+ @param img 水印图片
+ @param coverImg 水印图片二
+ @param question 字符串水印
+ @param fileName 生成之后的视频名字
+ */
 -(void)saveVedioPath:(NSURL*)vedioPath WithWaterImg:(UIImage*)img WithCoverImage:(UIImage*)coverImg WithQustion:(NSString*)question WithFileName:(NSString*)fileName
 {
     [SVProgressHUD showWithStatus:@"生成水印视频到系统相册"];
@@ -129,8 +138,12 @@
     [movieFile addTarget:progressFilter];
     [uielement addTarget:filter];
     movieWriter.shouldPassthroughAudio = YES;
+    if ([[asset tracksWithMediaType:AVMediaTypeAudio] count] > 0){
+        movieFile.audioEncodingTarget = movieWriter;
+    } else {//no audio
+        movieFile.audioEncodingTarget = nil;
+    }
     //    movieFile.playAtActualSpeed = true;
-    movieFile.audioEncodingTarget = movieWriter;
     [movieFile enableSynchronizedEncodingUsingMovieWriter:movieWriter];
     // 显示到界面
     [filter addTarget:movieWriter];
@@ -144,7 +157,7 @@
 //    [dlink setPaused:NO];
     
     __weak typeof(self) weakSelf = self;
-    
+    //渲染
     [progressFilter setFrameProcessingCompletionBlock:^(GPUImageOutput *output, CMTime time) {
         //水印可以移动
         CGRect frame = coverImageView1.frame;
@@ -158,7 +171,7 @@
         [uielement update];
         
     }];
-    
+    //保存相册
     [movieWriter setCompletionBlock:^{
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
             __strong typeof(self) strongSelf = weakSelf;
