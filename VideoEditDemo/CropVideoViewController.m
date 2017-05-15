@@ -172,7 +172,7 @@ typedef void(^JLXCommonToolVedioCompletionHandler)(NSURL *assetURL,NSError *erro
                     [self goSaveVideoPath:[NSURL fileURLWithPath:newVideoPath] withStartTime:startTime withEndTime:endTime withSize:videoSize withVideoDealPoint:videoDealPoint WithFileName:fileName shouldScale:shouldScale isWxVideoAssetvertical:isVideoAssetvertical];
                 });
             }];
-            break;
+            return;
         }
     }
     if ([[videoAsset tracksWithMediaType:AVMediaTypeAudio] count] == 0){
