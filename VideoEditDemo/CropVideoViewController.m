@@ -221,7 +221,7 @@ typedef void(^JLXCommonToolVedioCompletionHandler)(NSURL *assetURL,NSError *erro
         AVMutableCompositionTrack * audioTrack = [mixComposition addMutableTrackWithMediaType:AVMediaTypeAudio preferredTrackID:kCMPersistentTrackID_Invalid];
         //音频采集通道
         AVAssetTrack * audioAssetTrack = [[audioAsset tracksWithMediaType:AVMediaTypeAudio] lastObject];
-        [audioTrack insertTimeRange:CMTimeRangeMake(startCropTime, endCropTime) ofTrack:audioAssetTrack atTime:kCMTimeZero error:nil];
+        [audioTrack insertTimeRange:CMTimeRangeFromTimeToTime(startCropTime, endCropTime) ofTrack:audioAssetTrack atTime:kCMTimeZero error:nil];
     }
     
     //3 视频通道  工程文件中的轨道，有音频轨、视频轨等，里面可以插入各种对应的素材
@@ -229,14 +229,14 @@ typedef void(^JLXCommonToolVedioCompletionHandler)(NSURL *assetURL,NSError *erro
                                                                         preferredTrackID:kCMPersistentTrackID_Invalid];
     NSError *error;
     //把视频轨道数据加入到可变轨道中 这部分可以做视频裁剪TimeRange
-    [videoTrack insertTimeRange:CMTimeRangeMake(startCropTime, endCropTime)
+    [videoTrack insertTimeRange:CMTimeRangeFromTimeToTime(startCropTime, endCropTime)
                         ofTrack:[[videoAsset tracksWithMediaType:AVMediaTypeVideo] lastObject]
                          atTime:kCMTimeZero error:&error];
     
     
     //3.1 AVMutableVideoCompositionInstruction 视频轨道中的一个视频，可以缩放、旋转等
     AVMutableVideoCompositionInstruction *mainInstruction = [AVMutableVideoCompositionInstruction videoCompositionInstruction];
-    mainInstruction.timeRange = CMTimeRangeMake(kCMTimeZero, videoTrack.timeRange.duration);
+    mainInstruction.timeRange = CMTimeRangeFromTimeToTime(kCMTimeZero, videoTrack.timeRange.duration);
     
     // 3.2 AVMutableVideoCompositionLayerInstruction 一个视频轨道，包含了这个轨道上的所有视频素材
     AVMutableVideoCompositionLayerInstruction *videolayerInstruction = [AVMutableVideoCompositionLayerInstruction videoCompositionLayerInstructionWithAssetTrack:videoTrack];
