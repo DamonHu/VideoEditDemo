@@ -14,6 +14,8 @@
     ///AVFoundation
     AVAsset * videoAsset;
     AVAssetExportSession *exporter;
+    
+    AVMutableCompositionTrack *AudioTrack;
 }
 @end
 
@@ -80,7 +82,7 @@
                         ofTrack:[[secondAsset tracksWithMediaType:AVMediaTypeVideo] objectAtIndex:0] atTime:firstAsset.duration error:nil];
     
     if (musciAsset!=nil){
-        AVMutableCompositionTrack *AudioTrack = [mixComposition addMutableTrackWithMediaType:AVMediaTypeAudio
+        AudioTrack = [mixComposition addMutableTrackWithMediaType:AVMediaTypeAudio
                                                                                 preferredTrackID:kCMPersistentTrackID_Invalid];
         [AudioTrack insertTimeRange:CMTimeRangeFromTimeToTime(kCMTimeZero, CMTimeAdd(firstAsset.duration, secondAsset.duration))
                                 ofTrack:[[musciAsset tracksWithMediaType:AVMediaTypeAudio] objectAtIndex:0] atTime:kCMTimeZero error:nil];
@@ -96,8 +98,23 @@
     // 5 - Create exporter
     exporter = [[AVAssetExportSession alloc] initWithAsset:mixComposition
                                                                       presetName:AVAssetExportPresetHighestQuality];
+    
+    //修改背景音乐的音量start
+    AVMutableAudioMix *videoAudioMixTools = [AVMutableAudioMix audioMix];
+    if (musciAsset) {
+        //调节音量
+        //获取音频轨道
+        AVMutableAudioMixInputParameters *firstAudioParam = [AVMutableAudioMixInputParameters audioMixInputParametersWithTrack:AudioTrack];
+        //设置音轨音量,可以设置渐变,设置为1.0就是全音量
+        [firstAudioParam setVolumeRampFromStartVolume:1.0 toEndVolume:1.0 timeRange:CMTimeRangeMake(kCMTimeZero, CMTimeAdd(firstAsset.duration, secondAsset.duration))];
+        [firstAudioParam setTrackID:AudioTrack.trackID];
+        videoAudioMixTools.inputParameters = [NSArray arrayWithObject:firstAudioParam];
+    }
+    //end
+    
     exporter.outputURL=url;
     exporter.outputFileType = AVFileTypeQuickTimeMovie;
+    exporter.audioMix = videoAudioMixTools;
     exporter.shouldOptimizeForNetworkUse = YES;
     [exporter exportAsynchronouslyWithCompletionHandler:^{
         dispatch_async(dispatch_get_main_queue(), ^{
